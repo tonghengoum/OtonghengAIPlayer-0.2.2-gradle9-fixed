@@ -1,0 +1,53 @@
+name: Build O.Tongheng AI Player
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Minecraft 1.21.11 Fabric Mod
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.0'
+
+      - name: Verify Java
+        run: java -version
+
+      - name: Verify Gradle
+        run: gradle --version
+
+      - name: Build Fabric mod
+        run: gradle build --no-daemon
+
+      - name: Show JAR
+        run: |
+          echo "=== Generated JAR files ==="
+          find build/libs -maxdepth 1 -type f -name "*.jar" -print
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: O-Tongheng-AI-Player-1.21.11
+          path: build/libs/*.jar
+          if-no-files-found: error
